@@ -26,6 +26,7 @@ export interface ServerOptions {
     certFile?: string,
     hostname?: string,
     keyFile?: string,
+    onPreResponse?: Function,
     port?: number
 }
 
@@ -77,9 +78,13 @@ export default class Server {
         });
 
         try {
-            const result = await route.handler(serverRequest, new Toolkit(serverRequest));
+            const h = new Toolkit(serverRequest);
+            const result = await route.handler(serverRequest, h);
             if (typeof result === 'undefined') {
                 throw bang.badImplementation(`Handler for ${toSignature(route)} returned undefined which is not allowed, return null or h.response() instead to explicitly send an empty response`);
+            }
+            if (typeof this.options.onPreResponse === 'function') {
+                await this.options.onPreResponse(result, h);
             }
             return serialize(result);
         }
