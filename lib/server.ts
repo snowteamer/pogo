@@ -83,10 +83,11 @@ export default class Server {
             if (typeof result === 'undefined') {
                 throw bang.badImplementation(`Handler for ${toSignature(route)} returned undefined which is not allowed, return null or h.response() instead to explicitly send an empty response`);
             }
+            const response = serialize(result);
             if (typeof this.options.onPreResponse === 'function') {
-                await this.options.onPreResponse(result, h);
+                await this.options.onPreResponse(response, h);
             }
-            return serialize(result);
+            return response;
         }
         catch (error) {
             console.error(error);
