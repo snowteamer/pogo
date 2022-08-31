@@ -50,8 +50,8 @@ export default class Server {
             ...options
         };
         this.raw = new http.Server({
-            handler : (request) => {
-                return this.inject(request);
+            handler : (request, connInfo) => {
+                return this.inject(request, connInfo);
             },
             hostname : this.options.hostname,
             port     : this.options.port
@@ -63,7 +63,7 @@ export default class Server {
             this.router.all('/{catchAll*}', catchAll);
         }
     }
-    async inject(request: Request | string | URL): Promise<Response> {
+    async inject(request: Request | string | URL, connInfo: http.ConnInfo): Promise<Response> {
         const rawRequest = request instanceof Request ? request : new Request(new URL(request.toString(), this.url).toString());
         const url = new URL(rawRequest.url);
         const route = this.router.lookup(rawRequest.method, url.pathname, url.hostname);
